@@ -1,0 +1,47 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.1.2' // 사용 중인 Spring Boot 버전에 맞게 수정
+	id 'io.spring.dependency-management' version '1.1.2'
+}
+
+java {
+	toolchain {
+		languageVersion.set(JavaLanguageVersion.of(17))
+	}
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// ✅ Spring Boot 기본 라이브러리
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// ✅ Spring Data JPA (MySQL 연동용)
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// ✅ MySQL JDBC Driver
+	implementation 'mysql:mysql-connector-java:8.0.33'
+
+	// ✅ Spring Security (JWT 사용 시 필요)
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+	// ✅ Lombok (자동 Getter/Setter 생성)
+	implementation 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+	// ✅ Spring Boot Test (테스트용)
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
