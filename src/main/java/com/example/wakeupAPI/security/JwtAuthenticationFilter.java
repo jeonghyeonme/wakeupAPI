@@ -31,6 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
+        String clientIP = request.getRemoteAddr(); // ✅ 요청한 클라이언트의 IP 주소
+
+        // ✅ 로그 추가: 요청 URL과 IP 주소 기록
+        System.out.println("📡 Request URL: " + requestURI + ", IP: " + clientIP);
 
         // ✅ 특정 엔드포인트는 JWT 검증 생략 (Authorization 헤더가 있어도 통과)
         if (isPublicEndpoint(requestURI)) {
@@ -43,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // ✅ Authorization 헤더가 없으면 인증 없이 진행
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            System.out.println("No valid Authorization header found, proceeding without authentication.");
+            System.out.println("❌ No valid Authorization header found, proceeding without authentication.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -52,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // ✅ 빈 토큰인 경우 검증 생략
         if (token.trim().isEmpty()) {
-            System.out.println("Empty JWT Token, proceeding without authentication.");
+            System.out.println("❌ Empty JWT Token, proceeding without authentication.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -62,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = jwtUtil.extractUsername(token);
             String role = jwtUtil.extractUserType(token).toLowerCase();
 
-            System.out.println("Extracted userType from JWT: " + role);
+            System.out.println("🔍 Extracted userType from JWT: " + role);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
@@ -72,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-                System.out.println("Valid JWT Token - User: " + username + ", Role: " + role);
+                System.out.println("✅ Valid JWT Token - User: " + username + ", Role: " + role);
             }
 
         } catch (ExpiredJwtException e) {
@@ -111,7 +115,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @throws IOException 예외 처리
      */
     private void handleAuthException(HttpServletResponse response, String message, Exception e) throws IOException {
-        System.out.println(message + ": " + e.getMessage());
+        System.out.println("❌ " + message + ": " + e.getMessage());
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

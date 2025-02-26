@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
@@ -23,11 +24,16 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
             @Param("end") LocalDateTime end);
 
     // ✅ 특정 날짜 이후 가장 가까운 일정 조회
-    List<Schedule> findByStartTimeAfterOrderByStartTimeAsc(LocalDateTime targetTime);
+    @Query("SELECT s FROM Schedule s WHERE s.startTime > :currentTime AND s.driverUserIdx = :driverIdx ORDER BY s.startTime ASC")
+    List<Schedule> findTop1ByStartTimeAfterAndDriverUserIdxOrderByStartTimeAsc(
+            @Param("currentTime") LocalDateTime currentTime,
+            @Param("driverIdx") int driverIdx);
 
-    // ✅ 특정 날짜 사용자 일정 조회 (driver_user_idx 기반)
-    @Query("SELECT s FROM Schedule s WHERE s.startTime LIKE CONCAT(:startTime, '%') AND s.driverUserIdx = :driverIdx")
-    List<Schedule> findByStartTimeContainingAndDriverUserIdx(
-            @Param("startTime") String startTime,
+
+    // ✅ 특정 날짜 사용자 일정 조회 (driver_user_idx 기반) - 수정됨
+    @Query("SELECT s FROM Schedule s WHERE s.startTime BETWEEN :startTime AND :endTime AND s.driverUserIdx = :driverIdx ORDER BY s.startTime ASC")
+    List<Schedule> findByStartTimeBetweenAndDriverUserIdx(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
             @Param("driverIdx") int driverIdx);
 }

@@ -8,6 +8,8 @@ import com.example.wakeupAPI.security.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -40,8 +42,14 @@ public class TripController {
                 return ResponseEntity.status(400).body(Map.of("message", "date 오류"));
             }
 
-            // ✅ 특정 날짜 + 사용자 일정 조회
-            List<Schedule> schedules = scheduleRepository.findByStartTimeContainingAndDriverUserIdx(date, userIdx);
+            // ✅ LocalDate를 LocalDateTime으로 변환 (00:00:00 ~ 23:59:59)
+            LocalDate localDate = LocalDate.parse(date);
+            LocalDateTime startTime = localDate.atStartOfDay();
+            LocalDateTime endTime = localDate.atTime(23, 59, 59);
+
+            // ✅ LocalDateTime + 사용자 일정 조회
+            List<Schedule> schedules = scheduleRepository.findByStartTimeBetweenAndDriverUserIdx(startTime, endTime, userIdx);
+
             if (schedules.isEmpty()) {
                 return ResponseEntity.ok(Map.of("rows", new ArrayList<>()));
             }
