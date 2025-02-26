@@ -43,10 +43,10 @@ public class SecurityConfig {
                 .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class) // ✅ CORS 필터를 Security 필터보다 먼저 실행
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ✅ OPTIONS 요청 인증 없이 허용
-                        .requestMatchers("/account/login", "/account/find-id", "/account/find-password").permitAll()
+//                        .requestMatchers("/account/login", "/account/find-id", "/account/find-password").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("admin")
                         .requestMatchers("/trip/**").hasAnyAuthority("admin", "crew")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

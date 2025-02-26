@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TestprojectApplication {
+public class wakeupAPIApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TestprojectApplication.class, args);
+		SpringApplication.run(wakeupAPIApplication.class, args);
 	}
 
 }
