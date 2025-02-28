@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // ✅ 특정 엔드포인트는 JWT 검증 생략 (Authorization 헤더가 있어도 통과)
         if (isPublicEndpoint(requestURI)) {
-            System.out.println("Public Endpoint Skipped: " + requestURI);
+            System.out.println("✅ Public Endpoint Skipped: " + requestURI);
             filterChain.doFilter(request, response);
             return;
         }
@@ -64,19 +64,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             // ✅ JWT에서 사용자 정보 추출
             String username = jwtUtil.extractUsername(token);
-            String role = jwtUtil.extractUserType(token).toLowerCase();
+            String role = jwtUtil.extractUserType(token);
+            int userIdx = jwtUtil.extractUserIdx(token); // ✅ userIdx 추출 추가
 
-            System.out.println("🔍 Extracted userType from JWT: " + role);
+            System.out.println("🔍 Extracted userType from JWT: " + role + ", userIdx: " + userIdx);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
+                // ✅ userIdx를 principal로 설정 (기존 코드 수정)
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                        new UsernamePasswordAuthenticationToken(userIdx, null, authorities); // ✅ userIdx를 principal로 저장
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-                System.out.println("✅ Valid JWT Token - User: " + username + ", Role: " + role);
+                System.out.println("✅ Valid JWT Token - UserIdx: " + userIdx + ", Role: " + role);
             }
 
         } catch (ExpiredJwtException e) {
@@ -103,7 +105,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isPublicEndpoint(String requestURI) {
         return requestURI.startsWith("/account/login") ||
                 requestURI.startsWith("/account/find-id") ||
-                requestURI.startsWith("/account/find-password");
+                requestURI.startsWith("/account/find-password") ||
+                requestURI.startsWith("/account/accesstoken");
     }
 
     /**

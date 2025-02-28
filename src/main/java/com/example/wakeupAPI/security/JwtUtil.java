@@ -25,12 +25,14 @@ public class JwtUtil {
 
     // ✅ Access Token 생성 (username, type, userIdx 포함)
     public String generateToken(String username, String type, int userIdx) {
+        System.out.println("🔑 토큰 생성 - username: " + username + ", type: " + type + ", userIdx: " + userIdx);
+
         return Jwts.builder()
                 .setSubject(username)
-                .claim("type", type)  // 사용자 역할
-                .claim("userIdx", userIdx)  // 사용자 고유번호
+                .claim("type", type)
+                .claim("userIdx", userIdx)  // ✅ userIdx 포함 확인
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration)) // 1시간 유효
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -74,9 +76,20 @@ public class JwtUtil {
         return extractClaim(token, claims -> claims.get("type", String.class));
     }
 
-    // ✅ 사용자 userIdx 추출
+    // ✅ 사용자 userIdx 추출 (null 체크 추가)
     public int extractUserIdx(String token) {
-        return extractClaim(token, claims -> claims.get("userIdx", Integer.class));
+        Object userIdxObj = extractClaim(token, claims -> claims.get("userIdx"));
+        System.out.println("🔍 JWT 추출된 userIdx 값: " + userIdxObj);
+
+        if (userIdxObj == null) {
+            throw new IllegalStateException("❌ JWT에 userIdx가 포함되지 않았습니다. Access Token을 다시 확인하세요.");
+        }
+
+        try {
+            return Integer.parseInt(userIdxObj.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("❌ JWT userIdx 형식이 잘못되었습니다.", e);
+        }
     }
 
     // ✅ 특정 Claim 추출 메서드
